@@ -213,8 +213,8 @@ class Viewport {
     var stage = this.app.getKonvaStage();
     this.x = stage.width() * 10 / 100;
     this.y = stage.height() * 10 / 100;
-    this.w = stage.width() - (2 * stage.width() * 10 / 100);
-    this.h = stage.height() - (2 * stage.height() * 10 / 100);
+    this.w = this.app.stageWidth;
+    this.h = this.app.stageHeight;
 
     this.viewport.x(this.x)
     this.viewport.y(this.y)
