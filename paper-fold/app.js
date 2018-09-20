@@ -211,10 +211,18 @@ class Viewport {
   
   resize(){
     var stage = this.app.getKonvaStage();
-    this.x = stage.width() * 10 / 100;
-    this.y = stage.height() * 10 / 100;
+    this.x = stage.width() * 5 / 100;
+    this.y = stage.height() * 5 / 100;
     this.w = this.app.stageWidth;
     this.h = this.app.stageHeight;
+    
+    console.log('vx => ' + this.x);
+    console.log('vy => ' + this.y);
+    console.log('vw => ' + this.w);
+    console.log('vh => ' + this.h);
+    
+    console.log('sh => ' + this.app.stage.height());
+    console.log('sw => ' + this.app.stage.width());
 
     this.viewport.x(this.x)
     this.viewport.y(this.y)
