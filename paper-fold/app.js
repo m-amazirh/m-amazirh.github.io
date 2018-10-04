@@ -1,12 +1,12 @@
 class App {
-  constructor(canvasId, stageWidth, stageHeight){
+  constructor(canvasId, stageWidth, stageHeight) {
     this.stageWidth = stageWidth;
     this.stageHeight = stageHeight;
 
     this.stage = new Konva.Stage({
       container: canvasId,
-      width: this.stageWidth * 110/100,
-      height: this.stageHeight *110/100
+      width: this.stageWidth,
+      height: this.stageHeight
     });
 
     this.workLayer = new Konva.Layer();
@@ -14,21 +14,21 @@ class App {
     this.stage.add(this.bgLayer);
     this.stage.add(this.workLayer);
 
-    
 
-    this.viewport = new Viewport(this);  
-    this.bgImage = new KImage(this,"iBgImage");
-    this.ulFold = new Fold(this, this.viewport.x, this.viewport.y, true, true);  
-    this.urFold = new Fold(this, this.viewport.x + this.viewport.w, this.viewport.y, true, false);  
-    this.llFold = new Fold(this, this.viewport.x, this.viewport.y + this.viewport.h, false, true); 
-    this.lrFold = new Fold(this, this.viewport.x + this.viewport.w, this.viewport.y + this.viewport.h, false, false);  
-    
+
+    this.viewport = new Viewport(this);
+    this.bgImage = new KImage(this, "iBgImage");
+    this.ulFold = new Fold(this, this.viewport.x, this.viewport.y, true, true);
+    this.urFold = new Fold(this, this.viewport.x + this.viewport.w, this.viewport.y, true, false);
+    this.llFold = new Fold(this, this.viewport.x, this.viewport.y + this.viewport.h, false, true);
+    this.lrFold = new Fold(this, this.viewport.x + this.viewport.w, this.viewport.y + this.viewport.h, false, false);
+
 
     this.stage.draw();
 
     var thisApp = this;
 
-    this.stage.on('wheel', function(e){
+    this.stage.on('wheel', function (e) {
       var delta = e.evt.deltaY || e.evt.wheelDelta;
       if (delta > 0) {
         thisApp.scaleUpBgImage();
@@ -40,20 +40,20 @@ class App {
     thisApp.lastMouseX = 0;
     thisApp.lastMouseY = 0;
 
-    document.addEventListener('mousedown', function(e){
+    document.addEventListener('mousedown', function (e) {
       thisApp.isMouseDown = true;
     })
 
-    document.addEventListener('mouseup', function(e){
+    document.addEventListener('mouseup', function (e) {
       thisApp.isMouseDown = false;
     })
 
-    document.addEventListener('mousemove', function(e){
-      if(thisApp.isMouseDown && thisApp.bgImageFocus){
+    document.addEventListener('mousemove', function (e) {
+      if (thisApp.isMouseDown && thisApp.bgImageFocus) {
         var deltaX = e.screenX - thisApp.lastMouseX;
         var deltaY = e.screenY - thisApp.lastMouseY;
 
-        if(Math.abs(deltaX) < 100 && Math.abs(deltaY) < 100){
+        if (Math.abs(deltaX) < 100 && Math.abs(deltaY) < 100) {
           thisApp.moveBgImage(deltaX, deltaY);
         }
       }
@@ -64,22 +64,22 @@ class App {
 
     this.bgImageFocus = false;
 
-    document.addEventListener('keydown', function(e){
-      if(e.key == 'f'){
+    document.addEventListener('keydown', function (e) {
+      if (e.key == 'f') {
         console.log('DOWN')
         thisApp.bgImageFocus = true;
       }
     })
 
-    document.addEventListener('keyup', function(e){
-      if(e.key == 'f'){
+    document.addEventListener('keyup', function (e) {
+      if (e.key == 'f') {
         console.log('UP')
         thisApp.bgImageFocus = false;
       }
     })
   }
 
-  updateFoldColor(color){
+  updateFoldColor(color) {
     this.ulFold.getKonvaObj().fill(color);
     this.urFold.getKonvaObj().fill(color);
     this.llFold.getKonvaObj().fill(color);
@@ -87,59 +87,115 @@ class App {
     this.stage.draw();
   }
 
-  updateBgImage(data){
+  updateBgImage(data) {
     this.bgImage.updateImage(data);
     this.stage.draw();
   }
 
-  scaleDownBgImage(){
-    if(this.bgImageFocus == true){
+  scaleDownBgImage() {
+    if (this.bgImageFocus == true) {
       this.bgImage.scaleDown();
       this.stage.draw();
     }
   }
 
-  scaleUpBgImage(){
-    if(this.bgImageFocus == true){
+  scaleUpBgImage() {
+    if (this.bgImageFocus == true) {
       this.bgImage.scaleUp();
       this.stage.draw();
     }
   }
 
-  moveBgImage(detlaX, deltaY){
-    if(this.bgImageFocus){
+  moveBgImage(detlaX, deltaY) {
+    if (this.bgImageFocus) {
       this.bgImage.move(detlaX, deltaY)
       this.stage.draw();
     }
   }
 
-  getViewport(){
+  getViewport() {
     return this.viewport;
   }
 
-  getKonvaStage(){
+  getKonvaStage() {
     return this.stage;
   }
 
-  getKonvaLayer(){
+  getKonvaLayer() {
     return this.workLayer;
   }
 
-  resize(w,h){
+  resize(w, h) {
     this.stage.width(w);
     this.stage.height(h);
     this.stage.draw();
     this.viewport.resize();
   }
+
+  exportWorkCanvas() {
+    return this.foldLayer.toCanvas();
+  }
+
+  exportBackgroundCanvas() {
+    return this.bgLayer.toCanvas();
+  }
+
+  exportPSD() {
+    this.ulFold.hideCorner();
+    this.ulFold.hideMtriangle();
+    this.urFold.hideCorner();
+    this.urFold.hideMtriangle();
+    this.llFold.hideCorner();
+    this.llFold.hideMtriangle();
+    this.lrFold.hideCorner();
+    this.lrFold.hideMtriangle();
+    
+
+    var bgCanvas = this.bgLayer.toCanvas();
+    var foldCanvas = this.workLayer.toCanvas();
+    var psd = {
+      width: this.stage.width(),
+      height: this.stage.height(),
+      children: [
+        {
+          name: 'arriere_plan',
+          canvas: bgCanvas
+        },
+        {
+          name: 'plis',
+          canvas: foldCanvas
+        }
+      ]
+    };
+
+    var writePsd = agPsd.writePsd;
+
+    const buffer = writePsd(psd);
+    const blob = new Blob([buffer], { type: 'application/octet-stream' });
+    saveAs(blob, 'my-file.psd');
+
+    this.ulFold.showCorner();
+    this.ulFold.showMtriangle();
+    this.urFold.showCorner();
+    this.urFold.showMtriangle();
+    this.llFold.showCorner();
+    this.llFold.showMtriangle();
+    this.lrFold.showCorner();
+    this.lrFold.showMtriangle();
+  }
+
+  destroy() {
+    this.stage.destroy();
+  }
 }
 
-class KImage{
-  constructor(app, imageElementId){
+class KImage {
+  constructor(app, imageElementId) {
     this.app = app;
     this.imageElementId = imageElementId;
     this.image = new Konva.Image({
-      x:0,
-      y:0,
+      x: 0,
+      y: 0,
     })
 
     this.XRatio = 1;
@@ -150,21 +206,21 @@ class KImage{
     this.image.moveToBottom();
   }
 
-  updateImage(data){
+  updateImage(data) {
     this.image.setImage(data);
   }
 
-  scaleDown(){
-    this.image.setScaleX(this.image.scaleX()/1.1);
-    this.image.setScaleY(this.image.scaleY()/1.1);
+  scaleDown() {
+    this.image.setScaleX(this.image.scaleX() / 1.1);
+    this.image.setScaleY(this.image.scaleY() / 1.1);
   }
 
-  scaleUp(){
-    this.image.setScaleX(this.image.scaleX()*1.1);
-    this.image.setScaleY(this.image.scaleY()*1.1);
+  scaleUp() {
+    this.image.setScaleX(this.image.scaleX() * 1.1);
+    this.image.setScaleY(this.image.scaleY() * 1.1);
   }
 
-  move(deltaX, deltaY){
+  move(deltaX, deltaY) {
     this.image.move({
       x: deltaX,
       y: deltaY
@@ -175,84 +231,34 @@ class KImage{
 
 
 class Viewport {
-  constructor(app){
+  constructor(app) {
     this.app = app;
     var stage = app.getKonvaStage();
-    
+
     this.viewport = new Konva.Rect({
     });
 
-    this.bgRect1 = new Konva.Rect({
-      fill: 'white'
-    });
-
-    this.bgRect2 = new Konva.Rect({
-      fill: 'white'
-    });
-
-    this.bgRect3 = new Konva.Rect({
-      fill: 'white'
-    });
-
-    this.bgRect4 = new Konva.Rect({
-      fill: 'white'
-    });
 
     this.resize();
 
     app.workLayer.add(this.viewport);
-    app.bgLayer.add(this.bgRect1);
-    app.bgLayer.add(this.bgRect2);
-    app.bgLayer.add(this.bgRect3);
-    app.bgLayer.add(this.bgRect4);
 
-    
+
+
   }
-  
-  resize(){
+
+  resize() {
     var stage = this.app.getKonvaStage();
-    this.x = stage.width() * 5 / 100;
-    this.y = stage.height() * 5 / 100;
+    this.x = 0;
+    this.y = 0;
     this.w = this.app.stageWidth;
     this.h = this.app.stageHeight;
-    
-    console.log('vx => ' + this.x);
-    console.log('vy => ' + this.y);
-    console.log('vw => ' + this.w);
-    console.log('vh => ' + this.h);
-    
-    console.log('sh => ' + this.app.stage.height());
-    console.log('sw => ' + this.app.stage.width());
+
 
     this.viewport.x(this.x)
     this.viewport.y(this.y)
     this.viewport.width(this.w)
     this.viewport.height(this.h)
-
-    this.bgRect1.x(0);
-    this.bgRect1.y(0);
-
-    this.bgRect1.width(this.x);
-    this.bgRect1.height(this.app.stage.height());
-
-    this.bgRect2.x(this.x);
-    this.bgRect2.y(0);
-
-    this.bgRect2.width(this.w);
-    this.bgRect2.height(this.y);
-
-    this.bgRect3.x(this.x+this.w);
-    this.bgRect3.y(0);
-
-    this.bgRect3.width(this.x);
-    this.bgRect3.height(this.app.stage.height());
-
-    this.bgRect4.x(this.x);
-    this.bgRect4.y(this.y + this.h);
-
-    this.bgRect4.width(this.w);
-    this.bgRect4.height(this.y);
-
   }
 }
 
@@ -260,8 +266,8 @@ class Viewport {
 
 
 
-class Fold{
-  constructor(app, cornerX, cornerY, isUp, isLeft){
+class Fold {
+  constructor(app, cornerX, cornerY, isUp, isLeft) {
     var thisFold = this;
     this.lastDragPos = {
       x: cornerX,
@@ -279,29 +285,29 @@ class Fold{
       radius: 10,
       fill: 'green',
       draggable: true,
-      dragBoundFunc: function(pos) {
+      dragBoundFunc: function (pos) {
         var bX = pos.x;
         var bY = pos.y;
 
-        if(isLeft){
-          bX = pos.x>cornerX ? pos.x : cornerX;
-        }else{
-          bX = pos.x<=cornerX ? pos.x : cornerX;
+        if (isLeft) {
+          bX = pos.x > cornerX ? pos.x : cornerX;
+        } else {
+          bX = pos.x <= cornerX ? pos.x : cornerX;
         }
 
-        if(isUp){
-          bY = pos.y>cornerY ? pos.y : cornerY
-        }else{
-          bY = pos.y<=cornerY ? pos.y : cornerY
+        if (isUp) {
+          bY = pos.y > cornerY ? pos.y : cornerY
+        } else {
+          bY = pos.y <= cornerY ? pos.y : cornerY
         }
 
-        
+
         thisFold.lastDragPos = {
           x: bX,
           y: bY
         }
-        return thisFold.lastDragPos;       
-    }
+        return thisFold.lastDragPos;
+      }
     });
 
     var coefX = isLeft ? 1 : -1;
@@ -309,19 +315,15 @@ class Fold{
 
     this.triangle = new Konva.Line({
       fill: '#00D2FF',
-      closed : true,
-      shadowColor: 'black',
-      shadowBlur: 5,
-      shadowOffset: {x : coefX * 5, y : coefY * 5},
-      shadowOpacity: 0.7
+      closed: true,
     })
 
     this.mTriangle = new Konva.Line({
       fill: '#FFFFFF',
-      closed : true,
+      closed: true,
     })
 
-    
+
     app.workLayer.add(this.triangle);
     app.workLayer.add(this.mTriangle);
     app.workLayer.add(this.circle);
@@ -333,67 +335,67 @@ class Fold{
     var mTriangle = this.mTriangle;
 
     this.lowerPoint = {
-      x:cornerX,
-      y:cornerY
+      x: cornerX,
+      y: cornerY
     }
 
     this.dragPoint = {
-      x:cornerX,
-      y:cornerY
+      x: cornerX,
+      y: cornerY
     }
 
     this.upperPoint = {
-      x:cornerX,
-      y:cornerY
+      x: cornerX,
+      y: cornerY
     }
 
-    this.circle.on('dragmove', function(){
+    this.circle.on('dragmove', function () {
       thisFold.updateFoldPoints(cornerX, cornerY,
-                          circle.x(), circle.y());
+        circle.x(), circle.y());
 
-      triangle.points([thisFold.lowerPoint.x, thisFold.lowerPoint.y, 
-        thisFold.dragPoint.x, thisFold.dragPoint.y, 
-        thisFold.upperPoint.x, thisFold.upperPoint.y]);
+      triangle.points([thisFold.lowerPoint.x, thisFold.lowerPoint.y,
+      thisFold.dragPoint.x, thisFold.dragPoint.y,
+      thisFold.upperPoint.x, thisFold.upperPoint.y]);
 
-        mTriangle.points([thisFold.lowerPoint.x, thisFold.lowerPoint.y, 
-        cornerX, cornerY, 
-        thisFold.upperPoint.x, thisFold.upperPoint.y]);
+      mTriangle.points([thisFold.lowerPoint.x, thisFold.lowerPoint.y,
+        cornerX, cornerY,
+      thisFold.upperPoint.x, thisFold.upperPoint.y]);
     })
 
     var circle = this.circle;
     var stage = app.getKonvaStage();
 
-    this.circle.on('mousemove', function(){
+    this.circle.on('mousemove', function () {
       circle.fill('green')
       circle.opacity(1)
       stage.draw();
     })
-    this.circle.on('mouseout', function(){
+    this.circle.on('mouseout', function () {
       circle.fill('green')
       circle.opacity(0.2)
       stage.draw();
     })
   }
 
-  getKonvaObj(){
+  getKonvaObj() {
     return this.triangle;
   }
 
-  updateFoldPoints(originX, originY, currentX, currentY){
+  updateFoldPoints(originX, originY, currentX, currentY) {
     var vX = originX;
     var vY = originY;
     var cX = currentX;
     var cY = currentY;
-  
+
     var middleX = (cX + vX) / 2;
     var middleY = (cY + vY) / 2;
-  
-    var slope = (cX - vX)/(vY - cY);
+
+    var slope = (cX - vX) / (vY - cY);
     var b = middleY - (slope * middleX);
-  
+
     var y1 = vY;
     var x1 = (y1 - b) / slope
-  
+
     var x3 = vX;
     var y3 = (slope * x3) + b;
 
@@ -403,21 +405,37 @@ class Fold{
     }
 
     this.upperPoint = {
-      x: y1<y3 ? x1 : x3,
-      y: y1<y3 ? y1 : y3
+      x: y1 < y3 ? x1 : x3,
+      y: y1 < y3 ? y1 : y3
     }
 
     this.lowerPoint = {
-      x: y1>=y3 ? x1 : x3,
-      y: y1>=y3 ? y1 : y3
+      x: y1 >= y3 ? x1 : x3,
+      y: y1 >= y3 ? y1 : y3
     }
 
   }
 
-  recalculateDragPoint(){
-    var slope = (this.lowerPoint.x-this.upperPoint.x)/(this.upperPoint.y - this.lowerPoint.y)
+  recalculateDragPoint() {
+    var slope = (this.lowerPoint.x - this.upperPoint.x) / (this.upperPoint.y - this.lowerPoint.y)
     var b = this.cornerY - (slope * this.cornerX);
-    
+
+  }
+
+  hideCorner(){
+    this.circle.hide();
+  }
+
+  showCorner(){
+    this.circle.show();
+  }
+
+  hideMtriangle(){
+    this.mTriangle.hide();
+  }
+
+  showMtriangle(){
+    this.mTriangle.show();
   }
 
 }
