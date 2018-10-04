@@ -2,7 +2,6 @@ class App {
   constructor(canvasId, stageWidth, stageHeight) {
     this.stageWidth = stageWidth;
     this.stageHeight = stageHeight;
-    
 
     this.stage = new Konva.Stage({
       container: canvasId,
@@ -11,9 +10,11 @@ class App {
     });
 
     this.workLayer = new Konva.Layer();
+    this.inverseTriangleLayer = new Konva.Layer();
     this.bgLayer = new Konva.Layer();
     this.stage.add(this.bgLayer);
     this.stage.add(this.workLayer);
+    this.stage.add(this.inverseTriangleLayer);
 
 
 
@@ -326,7 +327,7 @@ class Fold {
 
 
     app.workLayer.add(this.triangle);
-    app.workLayer.add(this.mTriangle);
+    app.inverseTriangleLayer.add(this.mTriangle);
     app.workLayer.add(this.circle);
 
     this.app = app;
