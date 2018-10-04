@@ -65,6 +65,7 @@ class App {
     })
 
     this.bgImageFocus = false;
+    
 
     document.addEventListener('keydown', function (e) {
       if (e.key == 'f') {
