@@ -2,6 +2,7 @@ class App {
   constructor(canvasId, stageWidth, stageHeight) {
     this.stageWidth = stageWidth;
     this.stageHeight = stageHeight;
+    
 
     this.stage = new Konva.Stage({
       container: canvasId,
