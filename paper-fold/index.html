@@ -1,64 +1,81 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-		<style>
-				body {
-				  margin: 0;
-				  padding: 0;
-				  overflow: hidden;
-				  background-color: #F0F0F0;
-				}
-			  </style>
-<!-- Load the Paper.js library -->
-<script src="https://cdn.rawgit.com/konvajs/konva/2.3.0/konva.min.js"></script>
-<script type="text/javascript" src="app.js"></script>
-<!-- Define inlined JavaScript -->
-<script type="text/javascript">
-	var app = null;
-	// Only executed our code once the DOM is ready.
-	window.onload = function() {
-		var h = 720
-		var w = 1024
-
-		if(window.location.hash){
-			w = parseInt(window.location.hash.split('-')[0].substring(1))
-			h = parseInt(window.location.hash.split('-')[1])
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			background-color: #F0F0F0;
 		}
-		app = new App('myCanvas', w, h);
-		document.getElementById('iFoldColor').onchange = function(e){
-			app.updateFoldColor(document.getElementById('iFoldColor').value);
+	</style>
+	<!-- Load the Paper.js library -->
+	<script src="https://cdn.rawgit.com/konvajs/konva/2.3.0/konva.min.js"></script>
+	<script src="bundle.js"></script>
+	<script type="text/javascript" src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.js"></script>
+	<script type="text/javascript" src="app.js"></script>
+	<!-- Define inlined JavaScript -->
+	<script type="text/javascript">
+
+		var app = null;
+		// Only executed our code once the DOM is ready.
+		window.onload = function () {
+			var h = 720
+			var w = 1024
+
+			if (window.location.hash) {
+				w = parseInt(window.location.hash.split('-')[0].substring(1))
+				h = parseInt(window.location.hash.split('-')[1])
+			}
+			app = new App('myCanvas', w, h);
+			document.getElementById('iFoldColor').onchange = function (e) {
+				app.updateFoldColor(document.getElementById('iFoldColor').value);
+			}
+
+			document.getElementById('iBgImage').onchange = function (event) {
+				var selectedFile = event.target.files[0];
+				var reader = new FileReader();
+
+				var img = new Image();
+
+				reader.onload = function (event) {
+					img.onload = function () {
+						app.updateBgImage(img)
+					}
+					img.src = event.target.result;
+				};
+
+				reader.readAsDataURL(selectedFile);
+
+			}
+
+			document.getElementById('bExport').onclick = function () {
+				app.exportPSD();
+			}
+
 		}
 
-		document.getElementById('iBgImage').onchange = function(event){
-			var selectedFile = event.target.files[0];
-			var reader = new FileReader();
 
-			var img = new Image();
-
-			reader.onload = function(event) {
-				img.onload = function(){
-					app.updateBgImage(img)
-				}
-				img.src = event.target.result;				
-			};
-
-			reader.readAsDataURL(selectedFile);
-		}
-		
-	}
-
-	
 	/*window.onresize = function(event) {
 		app.resize(window.innerWidth, window.innerHeight - 100);
 	}*/
-</script>
+
+
+
+	</script>
 </head>
-<body>
+
+<body style="background-color:white">
 	<div>
-		Couleur du pli : <input id="iFoldColor" type="text"/>
-		Image de fond : <input id="iBgImage" type="file"/>
-		Image du pli : <input id="iFoldImage" type="file"/>
+		Couleur du pli :
+		<input id="iFoldColor" type="text" /> Image de fond :
+		<input id="iBgImage" type="file" /> Image du pli :
+		<input id="iFoldImage" type="file" />
+
+		<button id="bExport">Exporter en PSD</button>
 	</div>
-	<div id="myCanvas" ></div>
+	<div id="myCanvas" style="margin:0 auto; min-width:200;"></div>
 </body>
+
 </html>
