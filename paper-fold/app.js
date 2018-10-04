@@ -142,13 +142,13 @@ class App {
 
   exportPSD() {
     this.ulFold.hideCorner();
-    this.ulFold.hideMtriangle();
+    //this.ulFold.hideMtriangle();
     this.urFold.hideCorner();
-    this.urFold.hideMtriangle();
+    //this.urFold.hideMtriangle();
     this.llFold.hideCorner();
-    this.llFold.hideMtriangle();
+    //this.llFold.hideMtriangle();
     this.lrFold.hideCorner();
-    this.lrFold.hideMtriangle();
+    //this.lrFold.hideMtriangle();
     
 
     var bgCanvas = this.bgLayer.toCanvas();
@@ -175,13 +175,13 @@ class App {
     saveAs(blob, 'my-file.psd');
 
     this.ulFold.showCorner();
-    this.ulFold.showMtriangle();
+    //this.ulFold.showMtriangle();
     this.urFold.showCorner();
-    this.urFold.showMtriangle();
+    //this.urFold.showMtriangle();
     this.llFold.showCorner();
-    this.llFold.showMtriangle();
+    //this.llFold.showMtriangle();
     this.lrFold.showCorner();
-    this.lrFold.showMtriangle();
+    //this.lrFold.showMtriangle();
   }
 
   destroy() {
