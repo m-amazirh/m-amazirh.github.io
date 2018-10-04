@@ -155,6 +155,7 @@ class App {
 
     var bgCanvas = this.bgLayer.toCanvas();
     var foldCanvas = this.workLayer.toCanvas();
+    var iTriangleCanvas = this.inverseTriangleLayer.toCanvas();
     var psd = {
       width: this.stage.width(),
       height: this.stage.height(),
@@ -166,6 +167,10 @@ class App {
         {
           name: 'plis',
           canvas: foldCanvas
+        },
+        {
+          name: 'reverse_plis',
+          canvas: iTriangleCanvas
         }
       ]
     };
@@ -441,4 +446,3 @@ class Fold {
   }
 
 }
-
