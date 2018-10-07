@@ -21,16 +21,36 @@
 		var app = null;
 		// Only executed our code once the DOM is ready.
 		window.onload = function () {
-			var h = 720
-			var w = 1024
+			var h = parseInt(document.getElementById('iHeight').value);
+			var w = parseInt(document.getElementById('iWidth').value);
 
 			if (window.location.hash) {
 				w = parseInt(window.location.hash.split('-')[0].substring(1))
 				h = parseInt(window.location.hash.split('-')[1])
 			}
-			app = new App('myCanvas', w, h);
+			app = new App('canvas', w, h);
 			document.getElementById('iFoldColor').onchange = function (e) {
 				app.updateFoldColor(document.getElementById('iFoldColor').value);
+			}
+			document.getElementById('iBgColor').onchange = function (e) {
+				app.updateBgColor(document.getElementById('iBgColor').value);
+			}
+			document.getElementById('iDeltaShadow').onchange = function (e) {
+				app.updateDeltaShadow(document.getElementById('iDeltaShadow').value);
+			}
+
+			document.getElementById('iHeight').onchange = function (e) {
+				app.destroy();
+				h=parseInt(document.getElementById('iHeight').value);
+				w=parseInt(document.getElementById('iWidth').value);
+				app = new App('canvas', w, h);
+			}
+
+			document.getElementById('iWidth').onchange = function (e) {
+				app.destroy();
+				h=parseInt(document.getElementById('iHeight').value);
+				w=parseInt(document.getElementById('iWidth').value);
+				app = new App('canvas', w, h);
 			}
 
 			document.getElementById('iBgImage').onchange = function (event) {
@@ -64,18 +84,36 @@
 
 
 	</script>
+
+	<style>
+		#main {
+			width:100%;
+		}
+		#controls {
+			width:200px;
+			float:right;
+		}
+		#canvas{
+			width:auto;
+		}
+	</style>
 </head>
 
 <body style="background-color:white">
-	<div>
-		Couleur du pli :
-		<input id="iFoldColor" type="text" /> Image de fond :
-		<input id="iBgImage" type="file" /> Image du pli :
-		<input id="iFoldImage" type="file" />
+	<div id="main">
+	<div id="controls">
+		Couleur du pli : <input id="iFoldColor" type="text" /> <br/><br/>
+		Couleur du fond : <input id="iBgColor" type="text" /> <br/><br/>
+		Image de fond : <input id="iBgImage" type="file" /><br/><br/>
+		Delta ombre : <input id="iDeltaShadow" type="text"/><br/><br/>
+		Largeur : <input id="iWidth" type="text" value="1024"/><br/><br/>
+		Hauteur : <input id="iHeight" type="text" value="720"/><br/><br/>
+
 
 		<button id="bExport">Exporter en PSD</button>
 	</div>
-	<div id="myCanvas" style="margin:0 auto; min-width:200;"></div>
+	<div id="canvas" style="margin:0 auto; min-width:200;"></div>
+	</div>
 </body>
 
 </html>

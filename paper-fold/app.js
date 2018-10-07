@@ -9,12 +9,18 @@ class App {
       height: this.stageHeight
     });
 
-    this.workLayer = new Konva.Layer();
-    this.inverseTriangleLayer = new Konva.Layer();
+    this.deltaShadow = 50;
+
+    this.foldsLayer = new Konva.Layer();
+    this.antiFoldsLayer = new Konva.Layer();
+    this.shadowsLayer = new Konva.Layer();
     this.bgLayer = new Konva.Layer();
     this.stage.add(this.bgLayer);
-    this.stage.add(this.workLayer);
-    this.stage.add(this.inverseTriangleLayer);
+    this.stage.add(this.shadowsLayer);
+    this.stage.add(this.foldsLayer);
+    this.stage.add(this.antiFoldsLayer);
+    
+    
 
 
 
@@ -90,6 +96,15 @@ class App {
     this.stage.draw();
   }
 
+  updateBgColor(color) {
+    this.bgImage.updateBgColor(color);
+    this.stage.draw();
+  }
+
+  updateDeltaShadow(delta){
+    this.deltaShadow = parseInt(delta);
+  }
+
   updateBgImage(data) {
     this.bgImage.updateImage(data);
     this.stage.draw();
@@ -155,8 +170,10 @@ class App {
     
 
     var bgCanvas = this.bgLayer.toCanvas();
-    var foldCanvas = this.workLayer.toCanvas();
-    var iTriangleCanvas = this.inverseTriangleLayer.toCanvas();
+    var foldsCanvas = this.foldsLayer.toCanvas();
+    var antiFoldsCanvas = this.antiFoldsLayer.toCanvas();
+    var shadowCanvas = this.shadowsLayer.toCanvas();
+
     var psd = {
       width: this.stage.width(),
       height: this.stage.height(),
@@ -166,12 +183,16 @@ class App {
           canvas: bgCanvas
         },
         {
+          name: 'ombres',
+          canvas: shadowCanvas
+        },
+        {
           name: 'plis',
-          canvas: foldCanvas
+          canvas: foldsCanvas
         },
         {
           name: 'reverse_plis',
-          canvas: iTriangleCanvas
+          canvas: antiFoldsCanvas
         }
       ]
     };
@@ -209,13 +230,26 @@ class KImage {
     this.XRatio = 1;
     this.YRatio = 1;
 
+    this.bgRect = new Konva.Rect({
+      x:0,
+      y:0,
+      width:this.app.stage.width(),
+      height:this.app.stage.height(),
+      fill: '#FFFF00'
+    })
+
+    app.bgLayer.add(this.bgRect);
     app.bgLayer.add(this.image);
 
-    this.image.moveToBottom();
+    //this.image.moveToBottom();
   }
 
   updateImage(data) {
     this.image.setImage(data);
+  }
+
+  updateBgColor(color){
+    this.bgRect.fill(color);
   }
 
   scaleDown() {
@@ -249,7 +283,7 @@ class Viewport {
 
     this.resize();
 
-    app.workLayer.add(this.viewport);
+    //app.workLayer.add(this.viewport);
 
 
 
@@ -323,24 +357,31 @@ class Fold {
 
     this.triangle = new Konva.Line({
       fill: '#00D2FF',
-      closed: true,
+      closed: true
     })
 
-    this.mTriangle = new Konva.Line({
+    this.antiTriangle = new Konva.Line({
       fill: '#FFFFFF',
-      closed: true,
+      closed: true
+    });
+
+    this.shadowTriangle = new Konva.Line({
+      fill: '#000000',
+      closed: true
     })
 
 
-    app.workLayer.add(this.triangle);
-    app.inverseTriangleLayer.add(this.mTriangle);
-    app.workLayer.add(this.circle);
+    app.foldsLayer.add(this.triangle);
+    app.antiFoldsLayer.add(this.antiTriangle);
+    app.foldsLayer.add(this.circle);
+    app.shadowsLayer.add(this.shadowTriangle);
 
     this.app = app;
 
     var circle = this.circle;
     var triangle = this.triangle;
-    var mTriangle = this.mTriangle;
+    var antiTriangle = this.antiTriangle;
+    var shadowTriangle = this.shadowTriangle;
 
     this.lowerPoint = {
       x: cornerX,
@@ -365,9 +406,14 @@ class Fold {
       thisFold.dragPoint.x, thisFold.dragPoint.y,
       thisFold.upperPoint.x, thisFold.upperPoint.y]);
 
-      mTriangle.points([thisFold.lowerPoint.x, thisFold.lowerPoint.y,
+      antiTriangle.points([thisFold.lowerPoint.x, thisFold.lowerPoint.y,
         cornerX, cornerY,
       thisFold.upperPoint.x, thisFold.upperPoint.y]);
+
+      shadowTriangle.points([thisFold.lowerPoint.x, thisFold.lowerPoint.y,
+        thisFold.shadowPoint.x, thisFold.shadowPoint.y,
+      thisFold.upperPoint.x, thisFold.upperPoint.y]);
+      stage.draw();
     })
 
     var circle = this.circle;
@@ -377,12 +423,14 @@ class Fold {
       circle.fill('green')
       circle.opacity(1)
       stage.draw();
-    })
+    });
+
     this.circle.on('mouseout', function () {
       circle.fill('green')
       circle.opacity(0.2)
       stage.draw();
-    })
+    });
+
   }
 
   getKonvaObj() {
@@ -400,6 +448,9 @@ class Fold {
 
     var slope = (cX - vX) / (vY - cY);
     var b = middleY - (slope * middleX);
+
+    var slope0 = (originY - currentY)/(originX - currentX);
+    var b0 = currentY - (slope0 * currentX);
 
     var y1 = vY;
     var x1 = (y1 - b) / slope
@@ -422,6 +473,15 @@ class Fold {
       y: y1 >= y3 ? y1 : y3
     }
 
+    var nDelta = currentX - this.app.deltaShadow/Math.sqrt(1+slope0*slope0)
+    var pDelta = currentX + this.app.deltaShadow/Math.sqrt(1+slope0*slope0)
+
+    var sx = this.isLeft ? pDelta : nDelta
+    this.shadowPoint = {
+      x: sx,
+      y: Math.abs(slope0*(sx)+b0)
+    }
+
   }
 
   recalculateDragPoint() {
@@ -439,11 +499,11 @@ class Fold {
   }
 
   hideMtriangle(){
-    this.mTriangle.hide();
+    this.antiTriangle.hide();
   }
 
   showMtriangle(){
-    this.mTriangle.show();
+    this.antiTriangle.show();
   }
 
 }
